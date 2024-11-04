@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SSE Example</title>
+</head>
+<body>
+    <h1>Server-Sent Events Example</h1>
+    <div id="messages"></div>
+
+    <script>
+        // Replace '/sse' with the actual endpoint for your SSE
+        const shortEventSource = new EventSource('/sse');
+
+        const messagesDiv = document.getElementById('messages');
+
+        const addMessage = (message) =>{
+            const newMessage = document.createElement('div');
+            newMessage.textContent = message;
+            messagesDiv.appendChild(newMessage);
+
+            // Clear messages after 10 seconds
+            setTimeout(() => {
+                newMessage.remove();
+            }, 10000);
+        }
+
+        shortEventSource.onopen = () => {
+            addMessage("short-sse -- connected");
+        }
+        shortEventSource.addEventListener("elapsed", () => {
+            addMessage("short-sse -- " + event.type + ": " + event.data);
+        })
+        shortEventSource.addEventListener("end", () => {
+            addMessage("short-sse -- closed");
+            shortEventSource.close()
+        })
+
+        shortEventSource.onerror = (e) => {
+            console.error("EventSource failed:", e);
+            addMessage("short-sse -- error: " + e.message);
+        };
+
+
+        // Long-polling SSE
+        const longeEventSource = new EventSource('/long-sse');
+
+        longeEventSource.onopen = () => {
+            addMessage("long-sse -- connected" );
+        }
+
+        longeEventSource.addEventListener("elapsed", () => {
+            addMessage("long-sse -- " + event.type + ": " + event.data);
+        })
+        longeEventSource.onerror = (e) => {
+            console.error("EventSource failed:", e);
+            addMessage("long-sse -- error: " + e.message);
+        };
+
+
+
+    </script>
+</body>
+</html>
